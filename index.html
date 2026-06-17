@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planet — New Appointment</title>
+<script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js" type="text/javascript"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  :root {
+    --plum: #7E5378;
+    --plum-light: #B07A99;
+    --plum-pale: #f5eef2;
+    --plum-surface: #faf5f8;
+    --plum-border: #ece1e7;
+    --ink: #2a2a2a;
+    --ink-2: #5a5a5a;
+    --ink-3: #8a8a8a;
+    --ok: #2D7A3F;
+    --err: #a3334d;
+    --ok-bg: #ecf6ee;
+    --err-bg: #fbecf0;
+  }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    color: var(--ink);
+    background: var(--plum-pale);
+    font-size: 14px;
+    line-height: 1.4;
+    -webkit-font-smoothing: antialiased;
+  }
+  .container {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 0 24px 0;
+    background: #fff;
+    min-height: 100vh;
+    box-shadow: 0 0 0 1px var(--plum-border);
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, var(--plum-light) 0%, var(--plum) 100%);
+    padding: 22px 24px;
+    color: #fff;
+  }
+  .header h1 {
+    margin: 0; font-size: 19px; font-weight: 600; letter-spacing: -0.3px;
+  }
+  .header .sub {
+    font-size: 12px; opacity: 0.88; margin-top: 4px;
+  }
+
+  /* Body */
+  .body { padding: 20px 24px 0 24px; }
+
+  .field { margin-bottom: 18px; }
+  .field label.lbl {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--plum);
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    margin-bottom: 6px;
+  }
+  .field label.lbl .req { color: var(--err); }
+  .field .helper {
+    font-size: 11.5px; color: var(--ink-3); margin-top: 4px; font-style: italic;
+  }
+
+  /* Inputs */
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="date"],
+  input[type="time"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 11px 14px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--ink);
+    background: var(--plum-surface);
+    border: 1.5px solid var(--plum-border);
+    border-radius: 8px;
+    transition: border-color 0.15s, background 0.15s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--plum-light);
+    background: #fff;
+  }
+  select {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'><path fill='%237E5378' d='M6 7L0 0h12z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+  textarea {
+    resize: vertical;
+    min-height: 130px;
+    line-height: 1.55;
+  }
+  input::placeholder, textarea::placeholder {
+    color: #b0a0a8;
+  }
+
+  /* PCID validation status */
+  .pcid-status {
+    margin-top: 7px;
+    font-size: 12.5px;
+    line-height: 1.45;
+    padding: 9px 12px;
+    border-radius: 6px;
+    display: none;
+  }
+  .pcid-status.show { display: block; }
+  .pcid-status.valid {
+    background: var(--ok-bg);
+    color: var(--ok);
+    border-left: 3px solid var(--ok);
+  }
+  .pcid-status.invalid {
+    background: var(--err-bg);
+    color: var(--err);
+    border-left: 3px solid var(--err);
+  }
+
+  /* Format radio pills */
+  .format-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .pill-radio input { display: none; }
+  .pill-radio label {
+    display: block;
+    text-align: center;
+    padding: 11px 8px;
+    background: var(--plum-surface);
+    border: 1.5px solid var(--plum-border);
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .pill-radio label:hover { border-color: var(--plum-light); }
+  .pill-radio input:checked + label {
+    background: var(--plum);
+    border-color: var(--plum);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(126,83,120,0.25);
+  }
+
+  /* Date + Time + Duration row */
+  .row-3 {
+    display: grid;
+    grid-template-columns: 1.2fr 0.9fr 0.9fr;
+    gap: 10px;
+  }
+
+  /* Will-fire callout */
+  .callout {
+    margin-top: 18px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    display: none;
+  }
+  .callout.show { display: block; }
+  .callout.fires {
+    background: var(--ok-bg);
+    border-left: 3px solid var(--ok);
+    color: #2a4d34;
+  }
+  .callout.silent {
+    background: var(--plum-pale);
+    border-left: 3px solid var(--plum-light);
+    color: #5a3756;
+  }
+  .callout strong { color: var(--ink); }
+
+  /* Submit row */
+  .submit-row {
+    margin-top: 24px;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 10px;
+  }
+  .btn {
+    padding: 13px 16px;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-secondary {
+    background: var(--plum-surface);
+    color: var(--plum);
+    border: 1.5px solid var(--plum-border);
+  }
+  .btn-secondary:hover { background: var(--plum-pale); }
+  .btn-primary {
+    background: var(--plum);
+    background-image: linear-gradient(135deg, var(--plum-light), var(--plum));
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(126,83,120,0.25);
+  }
+  .btn-primary:hover { filter: brightness(1.06); }
+  .btn-primary:disabled {
+    background: #ccc;
+    background-image: none;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  /* Loading state */
+  .body.busy { opacity: 0.5; pointer-events: none; }
+
+  /* Toast notification */
+  .toast {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    right: 16px;
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    font-weight: 500;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    z-index: 1000;
+    animation: slideDown 0.3s ease;
+    display: none;
+  }
+  @keyframes slideDown {
+    from { transform: translateY(-100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .toast.show { display: block; }
+  .toast.success { background: var(--ok-bg); color: var(--ok); border: 1px solid var(--ok); }
+  .toast.error { background: var(--err-bg); color: var(--err); border: 1px solid var(--err); }
+</style>
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+
+<div class="container">
+
+  <div class="header">
+    <h1>New Appointment</h1>
+    <div class="sub" id="signedInAs">Planet Mortgages — broker tool</div>
+  </div>
+
+  <div class="body" id="formBody">
+
+    <!-- PCID -->
+    <div class="field">
+      <label class="lbl" for="pcid">PCID <span class="req">*</span></label>
+      <input type="text" id="pcid" placeholder="PMC-2026-3851" autocomplete="off">
+      <div class="pcid-status" id="pcidStatus"></div>
+    </div>
+
+    <!-- Appointment Type -->
+    <div class="field">
+      <label class="lbl" for="apptType">Appointment type <span class="req">*</span></label>
+      <select id="apptType">
+        <option value="">— Choose —</option>
+        <option value="1st Appt">1st Appointment</option>
+        <option value="2nd Appt">2nd Appointment</option>
+        <option value="Protection">Protection Review</option>
+        <option value="Catch Up">Catch Up</option>
+        <option value="Lead Call">Lead Call</option>
+        <option value="Other">Other</option>
+        <option value="Admin">Admin</option>
+      </select>
+    </div>
+
+    <!-- Format -->
+    <div class="field">
+      <label class="lbl">Format <span class="req">*</span></label>
+      <div class="format-row">
+        <div class="pill-radio">
+          <input type="radio" name="format" id="fmtPhone" value="Phone" checked>
+          <label for="fmtPhone">📞 Phone</label>
+        </div>
+        <div class="pill-radio">
+          <input type="radio" name="format" id="fmtTeams" value="Teams">
+          <label for="fmtTeams">🎥 Teams</label>
+        </div>
+        <div class="pill-radio">
+          <input type="radio" name="format" id="fmtF2F" value="F2F">
+          <label for="fmtF2F">🏢 F2F</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Broker -->
+    <div class="field">
+      <label class="lbl" for="broker">Broker <span class="req">*</span></label>
+      <select id="broker">
+        <option value="">— Choose broker —</option>
+        <option value="Sorcha Taylor|sorcha@planetmortgages.co.uk">Sorcha Taylor</option>
+        <option value="Frankie Bowers|frankie@planetmortgages.co.uk">Frankie Bowers</option>
+        <option value="Samantha Jeakins|samantha@planetmortgages.co.uk">Samantha Jeakins</option>
+        <option value="Jonny Grimsey|jonny@planetmortgages.co.uk">Jonny Grimsey</option>
+        <option value="Craig Humbles|craig@planetmortgages.co.uk">Craig Humbles</option>
+        <option value="Billie-Jai Day|billiejai@planetmortgages.co.uk">Billie-Jai Day</option>
+      </select>
+    </div>
+
+    <!-- Date / Time / Duration -->
+    <div class="field">
+      <label class="lbl">When <span class="req">*</span></label>
+      <div class="row-3">
+        <input type="date" id="apptDate">
+        <input type="time" id="apptTime" step="900">
+        <select id="duration">
+          <option value="30">30 min</option>
+          <option value="45">45 min</option>
+          <option value="60" selected>60 min</option>
+          <option value="90">90 min</option>
+          <option value="120">120 min</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="field">
+      <label class="lbl" for="notes">Internal notes</label>
+      <textarea id="notes" placeholder="Negotiation context · client situation · banks/brokers spoken to · AIP held with whom · income / employment · special considerations · etc."></textarea>
+      <div class="helper">These notes go into the calendar event body — visible to you, not sent to customer.</div>
+    </div>
+
+    <!-- Will-fire callout -->
+    <div class="callout" id="callout">
+      <div id="calloutText"></div>
+    </div>
+
+    <!-- Submit -->
+    <div class="submit-row">
+      <button class="btn btn-secondary" id="btnClear">Clear</button>
+      <button class="btn btn-primary" id="btnSubmit">Open in Outlook →</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ----- State -----
+  const PCID_RE = /^PMC-\d{4}-\d{3,5}$/i;
+  let officeReady = false;
+
+  // ----- Helpers -----
+  function $(id) { return document.getElementById(id); }
+  function val(id) { return $(id).value.trim(); }
+
+  function showToast(msg, type) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.className = 'toast show ' + (type || 'success');
+    setTimeout(() => { t.className = 'toast'; }, 4500);
+  }
+
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+  function defaultDateTime() {
+    // Tomorrow 10:00
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    $('apptDate').value = d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+    $('apptTime').value = '10:00';
+  }
+
+  function getFormat() {
+    const checked = document.querySelector('input[name="format"]:checked');
+    return checked ? checked.value : 'Phone';
+  }
+
+  function updateCallout() {
+    const type = val('apptType');
+    const fmt = getFormat();
+    const broker = $('broker').selectedOptions[0];
+    const brokerName = broker && broker.value ? broker.text : '—';
+
+    if (!type || !broker.value) {
+      $('callout').className = 'callout';
+      return;
+    }
+
+    const willFire = (type === '1st Appt' || type === 'Protection');
+    const c = $('callout');
+    const txt = $('calloutText');
+
+    if (willFire) {
+      c.className = 'callout show fires';
+      txt.innerHTML = '<strong>✉️ Auto-fire ON.</strong> Confirmation SMS + branded email will fire to customer (lookup via PCID). 24h + 30m reminders also auto-scheduled.';
+    } else {
+      c.className = 'callout show silent';
+      txt.innerHTML = '<strong>🔕 No auto-comms.</strong> Calendar event lands in <strong>' + brokerName + "'s</strong> diary. Only <em>1st Appt</em> and <em>Protection</em> trigger customer SMS/email.";
+    }
+  }
+
+  function validatePcidFormat() {
+    const v = val('pcid').toUpperCase();
+    const status = $('pcidStatus');
+    if (!v) {
+      status.className = 'pcid-status';
+      return false;
+    }
+    if (!PCID_RE.test(v)) {
+      status.className = 'pcid-status show invalid';
+      status.textContent = '✗ Format wrong. Expected PMC-2026-1234';
+      return false;
+    }
+    status.className = 'pcid-status show valid';
+    status.textContent = '✓ PCID format OK — customer details will be looked up via SPL';
+    return true;
+  }
+
+  function validateForm() {
+    const errs = [];
+    if (!validatePcidFormat()) errs.push('PCID');
+    if (!val('apptType')) errs.push('Appointment type');
+    if (!$('broker').value) errs.push('Broker');
+    if (!val('apptDate')) errs.push('Date');
+    if (!val('apptTime')) errs.push('Time');
+    return errs;
+  }
+
+  function buildSubject() {
+    return val('apptType') + ' · ' + val('pcid').toUpperCase() + ' · ' + getFormat();
+  }
+
+  function buildBody() {
+    const fmt = getFormat();
+    const broker = $('broker').selectedOptions[0];
+    const brokerLabel = broker.text + ' <' + broker.value.split('|')[1] + '>';
+    const notes = val('notes') || '(none)';
+
+    let joining = '';
+    if (fmt === 'Teams') joining = '🎥 Teams meeting — link in event';
+    else if (fmt === 'Phone') joining = '📞 Phone call — customer phone looked up via PCID';
+    else joining = '🏢 Face-to-face — confirm office location with customer';
+
+    return [
+      '──────────────────────────────────',
+      'PLANET MORTGAGES — APPOINTMENT',
+      '──────────────────────────────────',
+      'Type:     ' + val('apptType'),
+      'Format:   ' + fmt,
+      'Broker:   ' + brokerLabel,
+      'PCID:     ' + val('pcid').toUpperCase(),
+      'Duration: ' + val('duration') + ' min',
+      '',
+      joining,
+      '',
+      'INTERNAL NOTES',
+      '──────────────────────────────────',
+      notes,
+      '',
+      '──────────────────────────────────',
+      'Created via Planet Booker (Outlook add-in)',
+      ''
+    ].join('\n');
+  }
+
+  function buildDateTimes() {
+    const date = val('apptDate');
+    const time = val('apptTime');
+    const dur = parseInt(val('duration'), 10);
+    const start = new Date(date + 'T' + time + ':00');
+    const end = new Date(start.getTime() + dur * 60 * 1000);
+    return { start: start, end: end };
+  }
+
+  function onSubmit() {
+    const errs = validateForm();
+    if (errs.length) {
+      showToast('Missing: ' + errs.join(', '), 'error');
+      return;
+    }
+
+    const subject = buildSubject();
+    const body = buildBody();
+    const times = buildDateTimes();
+    const fmt = getFormat();
+
+    if (officeReady && Office.context.mailbox && Office.context.mailbox.displayNewAppointmentForm) {
+      Office.context.mailbox.displayNewAppointmentForm({
+        requiredAttendees: [],
+        subject: subject,
+        location: fmt === 'F2F' ? 'Planet Mortgages office' : (fmt === 'Teams' ? 'Microsoft Teams' : 'Phone'),
+        body: body,
+        start: times.start,
+        end: times.end
+      });
+      showToast('Opening Outlook appointment dialog…', 'success');
+    } else {
+      // Fallback: build a .ics file for download
+      const ics = buildIcs(subject, body, times.start, times.end, fmt);
+      const blob = new Blob([ics], { type: 'text/calendar' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'appointment.ics'; a.click();
+      URL.revokeObjectURL(url);
+      showToast('Office.js unavailable — .ics file downloaded instead', 'success');
+    }
+  }
+
+  function buildIcs(subject, body, start, end, location) {
+    function isoFmt(d) {
+      return d.getUTCFullYear() + pad(d.getUTCMonth()+1) + pad(d.getUTCDate()) +
+        'T' + pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + pad(d.getUTCSeconds()) + 'Z';
+    }
+    return [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Planet Mortgages//Booker//EN',
+      'BEGIN:VEVENT',
+      'UID:' + Date.now() + '@planetmortgages.co.uk',
+      'DTSTAMP:' + isoFmt(new Date()),
+      'DTSTART:' + isoFmt(start),
+      'DTEND:' + isoFmt(end),
+      'SUMMARY:' + subject,
+      'DESCRIPTION:' + body.replace(/\n/g, '\\n'),
+      'LOCATION:' + location,
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].join('\r\n');
+  }
+
+  function onClear() {
+    $('pcid').value = '';
+    $('apptType').value = '';
+    $('fmtPhone').checked = true;
+    $('broker').value = '';
+    $('notes').value = '';
+    $('duration').value = '60';
+    defaultDateTime();
+    $('pcidStatus').className = 'pcid-status';
+    $('callout').className = 'callout';
+    $('pcid').focus();
+  }
+
+  function init() {
+    defaultDateTime();
+    $('pcid').addEventListener('input', validatePcidFormat);
+    $('apptType').addEventListener('change', updateCallout);
+    $('broker').addEventListener('change', updateCallout);
+    document.querySelectorAll('input[name="format"]').forEach(r => r.addEventListener('change', updateCallout));
+    $('btnSubmit').addEventListener('click', onSubmit);
+    $('btnClear').addEventListener('click', onClear);
+    $('pcid').focus();
+  }
+
+  // Office.js init
+  if (window.Office && Office.onReady) {
+    Office.onReady(function (info) {
+      officeReady = true;
+      if (info && info.host) {
+        const who = (Office.context.mailbox && Office.context.mailbox.userProfile && Office.context.mailbox.userProfile.displayName) || '';
+        if (who) $('signedInAs').textContent = 'Signed in as ' + who;
+      }
+      init();
+    });
+  } else {
+    // Standalone (testing in browser)
+    init();
+  }
+})();
+</script>
+
+</body>
+</html>
