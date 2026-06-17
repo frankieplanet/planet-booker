@@ -11,7 +11,7 @@
   <ProviderName>Planet Mortgages</ProviderName>
   <DefaultLocale>en-GB</DefaultLocale>
   <DisplayName DefaultValue="Planet Booker"/>
-  <Description DefaultValue="Quickly book a new appointment from anywhere in Outlook. Validates against SPL, fires SMS + email confirmation, lands directly in your calendar."/>
+  <Description DefaultValue="Quickly book a new appointment from anywhere in Outlook."/>
   <IconUrl DefaultValue="https://frankieplanet.github.io/planet-booker/icon-64.png"/>
   <HighResolutionIconUrl DefaultValue="https://frankieplanet.github.io/planet-booker/icon-128.png"/>
   <SupportUrl DefaultValue="https://planetmortgages.co.uk"/>
@@ -42,8 +42,7 @@
   <Permissions>ReadWriteMailbox</Permissions>
 
   <Rule xsi:type="RuleCollection" Mode="Or">
-    <Rule xsi:type="ItemIs" ItemType="Message"/>
-    <Rule xsi:type="ItemIs" ItemType="Appointment"/>
+    <Rule xsi:type="ItemIs" ItemType="Message" FormType="Read"/>
   </Rule>
 
   <DisableEntityHighlighting>false</DisableEntityHighlighting>
@@ -59,10 +58,6 @@
       <Host xsi:type="MailHost">
         <DesktopFormFactor>
 
-          <!-- Function file for any future task-less commands -->
-          <FunctionFile resid="functionFile"/>
-
-          <!-- Ribbon button in Inbox / Mail Read pane -->
           <ExtensionPoint xsi:type="MessageReadCommandSurface">
             <OfficeTab id="TabDefault">
               <Group id="planetBookerGroup">
@@ -86,36 +81,11 @@
             </OfficeTab>
           </ExtensionPoint>
 
-          <!-- Ribbon button in Compose pane (when writing email) -->
           <ExtensionPoint xsi:type="MessageComposeCommandSurface">
             <OfficeTab id="TabDefault">
               <Group id="planetBookerGroupCompose">
                 <Label resid="groupLabel"/>
                 <Control xsi:type="Button" id="planetBookerButtonCompose">
-                  <Label resid="buttonLabel"/>
-                  <Supertip>
-                    <Title resid="buttonTitle"/>
-                    <Description resid="buttonDesc"/>
-                  </Supertip>
-                  <Icon>
-                    <bt:Image size="16" resid="icon16"/>
-                    <bt:Image size="32" resid="icon32"/>
-                    <bt:Image size="80" resid="icon80"/>
-                  </Icon>
-                  <Action xsi:type="ShowTaskpane">
-                    <SourceLocation resid="taskpaneUrl"/>
-                  </Action>
-                </Control>
-              </Group>
-            </OfficeTab>
-          </ExtensionPoint>
-
-          <!-- Ribbon button on Appointment (so brokers can also open it from a calendar event) -->
-          <ExtensionPoint xsi:type="AppointmentOrganizerCommandSurface">
-            <OfficeTab id="TabDefault">
-              <Group id="planetBookerGroupAppt">
-                <Label resid="groupLabel"/>
-                <Control xsi:type="Button" id="planetBookerButtonAppt">
                   <Label resid="buttonLabel"/>
                   <Supertip>
                     <Title resid="buttonTitle"/>
@@ -145,7 +115,6 @@
         <bt:Image id="icon80" DefaultValue="https://frankieplanet.github.io/planet-booker/icon-80.png"/>
       </bt:Images>
       <bt:Urls>
-        <bt:Url id="functionFile" DefaultValue="https://frankieplanet.github.io/planet-booker/function.html"/>
         <bt:Url id="taskpaneUrl" DefaultValue="https://frankieplanet.github.io/planet-booker/index.html"/>
       </bt:Urls>
       <bt:ShortStrings>
