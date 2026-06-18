@@ -42,7 +42,7 @@
   <Permissions>ReadWriteMailbox</Permissions>
 
   <Rule xsi:type="RuleCollection" Mode="Or">
-    <Rule xsi:type="ItemIs" ItemType="Message"/>
+    <Rule xsi:type="ItemIs" ItemType="Message" FormType="Read"/>
   </Rule>
 
   <DisableEntityHighlighting>false</DisableEntityHighlighting>
@@ -63,29 +63,6 @@
               <Group id="planetBookerGroup">
                 <Label resid="groupLabel"/>
                 <Control xsi:type="Button" id="planetBookerButton">
-                  <Label resid="buttonLabel"/>
-                  <Supertip>
-                    <Title resid="buttonTitle"/>
-                    <Description resid="buttonDesc"/>
-                  </Supertip>
-                  <Icon>
-                    <bt:Image size="16" resid="icon16"/>
-                    <bt:Image size="32" resid="icon32"/>
-                    <bt:Image size="80" resid="icon80"/>
-                  </Icon>
-                  <Action xsi:type="ShowTaskpane">
-                    <SourceLocation resid="taskpaneUrl"/>
-                  </Action>
-                </Control>
-              </Group>
-            </OfficeTab>
-          </ExtensionPoint>
-
-          <ExtensionPoint xsi:type="MessageComposeCommandSurface">
-            <OfficeTab id="TabDefault">
-              <Group id="planetBookerGroupCompose">
-                <Label resid="groupLabel"/>
-                <Control xsi:type="Button" id="planetBookerButtonCompose">
                   <Label resid="buttonLabel"/>
                   <Supertip>
                     <Title resid="buttonTitle"/>
